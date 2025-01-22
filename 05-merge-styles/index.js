@@ -3,7 +3,9 @@ const pathSourceDir = path.join(__dirname, "styles");
 const pathSourceFile = path.join(__dirname, "project-dist", "bundle.css");
 const fs = require("fs/promises");
 
-(async function compileCssFile() {
+compileCssFile(pathSourceDir, pathSourceFile);
+
+async function compileCssFile(pathSourceDir, pathSourceFile) {
   try {
     const files = await fs.readdir(pathSourceDir, { withFileTypes: true });
 
@@ -19,4 +21,6 @@ const fs = require("fs/promises");
   } catch (err) {
     console.error(err);
   }
-}) ();
+};
+
+exports.compileCssFile = compileCssFile;
