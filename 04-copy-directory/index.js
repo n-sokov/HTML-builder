@@ -5,25 +5,34 @@ const dist = path.join(__dirname, "files-copy");
 
 copy(src, dist);
 
-async function copy(pathSourceDir, pathDestDir) {
+async function copy(sourceDir, destDir) {
   try {
-    await fs.mkdir(pathDestDir, { recursive: true });
+    await fs.mkdir(destDir, { recursive: true });
 
-    const assetsFiles = await fs.readdir(pathSourceDir, { withFileTypes: true });
+    const sourceFiles = await fs.readdir(sourceDir, { withFileTypes: true });
+    const destFiles = await fs.readdir(destDir, { withFileTypes: true });
 
-    for (const el of assetsFiles) {
-      const pathSource = path.join(pathSourceDir, el.name);
-      const pathDest = path.join(pathDestDir, el.name);
+    const sourceFileNames = new Set(sourceFiles.map((el) => el.name));
 
-      if (el.isDirectory()) {
-        copy(pathSource, pathDest);
+    for (const file of destFiles) {
+      const destPath = path.join(destDir, file.name);
+      if (!sourceFileNames.has(file.name)) {
+        await fs.rm(destPath, { recursive: true, force: true });
       }
-      if (el.isFile()) {
-        await fs.copyFile(pathSource, pathDest);
+    }
+
+    for (const file of sourceFiles) {
+      const sourcePath = path.join(sourceDir, file.name);
+      const destPath = path.join(destDir, file.name);
+
+      if (file.isDirectory()) {
+        await copy(sourcePath, destPath);
+      } else if (file.isFile()) {
+        await fs.copyFile(sourcePath, destPath);
       }
     }
   } catch (err) {
-    console.error("Error copying files:", err.message);
+    console.error("Error copy directories:", err.message);
   }
 }
 
